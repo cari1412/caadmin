@@ -1,103 +1,156 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import {
+  HomeIcon,
+  UserGroupIcon,
+  BellIcon,
+  ChartBarIcon,
+  ClockIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
+} from '@heroicons/react/24/outline';
+import Dashboard from '../components/Dashboard';
+import UsersManagement from '../components/UsersManagement';
+import SendNotificationForm from '../components/SendNotificationForm';
+import ScheduledNotifications from '../components/ScheduledNotifications';
+import Analytics from '../components/Analytics';
+import Settings from '../components/Settings';
+import LoginForm from '../components/LoginForm';
+
+const navigation = [
+  { name: 'Дашборд', href: '#', icon: HomeIcon, id: 'dashboard' },
+  { name: 'Пользователи', href: '#', icon: UserGroupIcon, id: 'users' },
+  { name: 'Отправить уведомление', href: '#', icon: BellIcon, id: 'send' },
+  { name: 'Запланированные', href: '#', icon: ClockIcon, id: 'scheduled' },
+  { name: 'Аналитика', href: '#', icon: ChartBarIcon, id: 'analytics' },
+  { name: 'Настройки', href: '#', icon: Cog6ToothIcon, id: 'settings' },
+];
+
+export default function AdminPanel() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    setIsAuthenticated(!!token);
+    setIsLoading(false);
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token');
+    setIsAuthenticated(false);
+    setActiveTab('dashboard');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'users':
+        return <UsersManagement />;
+      case 'send':
+        return (
+          <div className="p-6">
+            <div className="mb-6">
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Отправить уведомление
+              </h1>
+              <p className="mt-2 text-sm text-gray-700">
+                Отправка push-уведомлений пользователям
+              </p>
+            </div>
+            <SendNotificationForm />
+          </div>
+        );
+      case 'scheduled':
+        return <ScheduledNotifications />;
+      case 'analytics':
+        return <Analytics />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="hidden md:flex md:w-64 md:flex-col">
+          <div className="flex flex-col flex-grow pt-5 bg-white shadow">
+            <div className="flex items-center flex-shrink-0 px-4">
+              <BellIcon className="h-8 w-8 text-blue-600" />
+              <span className="ml-2 text-xl font-semibold text-gray-900">
+                Admin Panel
+              </span>
+            </div>
+            <div className="mt-5 flex-grow flex flex-col">
+              <nav className="flex-1 px-2 pb-4 space-y-1">
+                {navigation.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`${
+                      activeTab === item.id
+                        ? 'bg-blue-50 border-blue-500 text-blue-700'
+                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    } group flex items-center px-2 py-2 text-sm font-medium border-l-4 w-full text-left`}
+                  >
+                    <item.icon
+                      className={`${
+                        activeTab === item.id ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                      } mr-3 flex-shrink-0 h-6 w-6`}
+                    />
+                    {item.name}
+                  </button>
+                ))}
+              </nav>
+              
+              {/* Logout button */}
+              <div className="px-2 pb-4">
+                <button
+                  onClick={handleLogout}
+                  className="group flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 w-full text-left"
+                >
+                  <ArrowRightOnRectangleIcon className="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+                  Выйти
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Mobile menu button */}
+        <div className="md:hidden">
+          {/* Здесь можно добавить мобильное меню при необходимости */}
+        </div>
+
+        {/* Main content */}
+        <div className="flex flex-col w-0 flex-1 overflow-hidden">
+          <main className="flex-1 relative overflow-y-auto focus:outline-none">
+            {renderContent()}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
