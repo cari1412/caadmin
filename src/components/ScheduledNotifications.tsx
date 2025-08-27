@@ -19,7 +19,7 @@ interface ScheduledNotification {
   executed: boolean;
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -74,7 +74,7 @@ export default function ScheduledNotifications() {
   });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('ru-RU', {
+    return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -101,13 +101,13 @@ export default function ScheduledNotifications() {
   const getTypeName = (type: string) => {
     switch (type) {
       case 'WELCOME':
-        return 'Приветствие';
+        return 'Welcome';
       case 'DISCOUNT_10MIN':
-        return 'Скидка 10мин';
+        return 'Discount 10min';
       case 'INACTIVITY_1HOUR':
-        return 'Неактивность 1ч';
+        return 'Inactivity 1h';
       case 'RETENTION':
-        return 'Удержание';
+        return 'Retention';
       default:
         return type;
     }
@@ -117,14 +117,14 @@ export default function ScheduledNotifications() {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">
-          Запланированные уведомления
+          Scheduled Notifications
         </h1>
         <p className="mt-2 text-sm text-gray-700">
-          Управление автоматическими и запланированными уведомлениями
+          Manage automatic and scheduled notifications
         </p>
       </div>
 
-      {/* Фильтры и действия */}
+      {/* Filters and actions */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
         <div className="flex space-x-4">
           <select
@@ -132,11 +132,11 @@ export default function ScheduledNotifications() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value="">Все типы</option>
-            <option value="WELCOME">Приветствие</option>
-            <option value="DISCOUNT_10MIN">Скидка 10мин</option>
-            <option value="INACTIVITY_1HOUR">Неактивность 1ч</option>
-            <option value="RETENTION">Удержание</option>
+            <option value="">All types</option>
+            <option value="WELCOME">Welcome</option>
+            <option value="DISCOUNT_10MIN">Discount 10min</option>
+            <option value="INACTIVITY_1HOUR">Inactivity 1h</option>
+            <option value="RETENTION">Retention</option>
           </select>
 
           <select
@@ -144,9 +144,9 @@ export default function ScheduledNotifications() {
             onChange={(e) => setExecutedFilter(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value="">Все статусы</option>
-            <option value="false">Ожидают выполнения</option>
-            <option value="true">Выполнены</option>
+            <option value="">All statuses</option>
+            <option value="false">Pending</option>
+            <option value="true">Executed</option>
           </select>
         </div>
 
@@ -155,7 +155,7 @@ export default function ScheduledNotifications() {
           disabled={cleanupMutation.isPending}
           className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
         >
-          {cleanupMutation.isPending ? 'Очистка...' : 'Очистить выполненные'}
+          {cleanupMutation.isPending ? 'Cleaning...' : 'Cleanup Executed'}
         </button>
       </div>
 
@@ -170,12 +170,12 @@ export default function ScheduledNotifications() {
       ) : error ? (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-700">
-            Ошибка загрузки: {error.message}
+            Loading error: {error.message}
           </div>
         </div>
       ) : (
         <>
-          {/* Список уведомлений */}
+          {/* Notifications list */}
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {data?.notifications.map((notification) => (
@@ -213,12 +213,12 @@ export default function ScheduledNotifications() {
                           </div>
                           
                           <span className="text-xs text-gray-500">
-                            Запланировано на: {formatDate(notification.scheduledFor)}
+                            Scheduled for: {formatDate(notification.scheduledFor)}
                           </span>
                           
                           {notification.executed && (
                             <span className="text-xs text-green-600">
-                              Выполнено
+                              Executed
                             </span>
                           )}
                         </div>
@@ -231,7 +231,7 @@ export default function ScheduledNotifications() {
                           onClick={() => cancelMutation.mutate(notification.id)}
                           disabled={cancelMutation.isPending}
                           className="inline-flex items-center p-2 border border-transparent rounded-full text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                          title="Отменить уведомление"
+                          title="Cancel notification"
                         >
                           <XCircleIcon className="h-4 w-4" />
                         </button>
@@ -239,11 +239,11 @@ export default function ScheduledNotifications() {
                     </div>
                   </div>
 
-                  {/* Дополнительные данные */}
+                  {/* Additional data */}
                   {notification.data && Object.keys(notification.data).length > 0 && (
                     <div className="mt-3 ml-10 p-3 bg-gray-50 rounded-lg">
                       <h4 className="text-xs font-medium text-gray-900 mb-2">
-                        Дополнительные данные:
+                        Additional data:
                       </h4>
                       <pre className="text-xs text-gray-600 font-mono">
                         {JSON.stringify(notification.data, null, 2)}
@@ -255,7 +255,7 @@ export default function ScheduledNotifications() {
             </ul>
           </div>
 
-          {/* Пагинация */}
+          {/* Pagination */}
           {data?.pagination && data.pagination.pages > 1 && (
             <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg shadow">
               <div className="flex-1 flex justify-between sm:hidden">
@@ -264,22 +264,22 @@ export default function ScheduledNotifications() {
                   disabled={page <= 1}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Предыдущая
+                  Previous
                 </button>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= data.pagination.pages}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Следующая
+                  Next
                 </button>
               </div>
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Показано <span className="font-medium">{(page - 1) * 20 + 1}</span> -
-                    <span className="font-medium"> {Math.min(page * 20, data.pagination.total)}</span> из
-                    <span className="font-medium"> {data.pagination.total}</span> результатов
+                    Showing <span className="font-medium">{(page - 1) * 20 + 1}</span> to
+                    <span className="font-medium"> {Math.min(page * 20, data.pagination.total)}</span> of
+                    <span className="font-medium"> {data.pagination.total}</span> results
                   </p>
                 </div>
                 <div>
@@ -289,17 +289,17 @@ export default function ScheduledNotifications() {
                       disabled={page <= 1}
                       className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                     >
-                      Предыдущая
+                      Previous
                     </button>
                     <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                      {page} из {data.pagination.pages}
+                      {page} of {data.pagination.pages}
                     </span>
                     <button
                       onClick={() => setPage(page + 1)}
                       disabled={page >= data.pagination.pages}
                       className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                     >
-                      Следующая
+                      Next
                     </button>
                   </nav>
                 </div>
@@ -307,11 +307,11 @@ export default function ScheduledNotifications() {
             </div>
           )}
 
-          {/* Статистика результата */}
+          {/* Success messages */}
           {cleanupMutation.isSuccess && (
             <div className="mt-4 rounded-md bg-green-50 p-4">
               <div className="text-sm text-green-700">
-                Выполненные уведомления успешно очищены
+                Executed notifications cleaned up successfully
               </div>
             </div>
           )}
@@ -319,7 +319,7 @@ export default function ScheduledNotifications() {
           {cancelMutation.isSuccess && (
             <div className="mt-4 rounded-md bg-green-50 p-4">
               <div className="text-sm text-green-700">
-                Уведомление успешно отменено
+                Notification cancelled successfully
               </div>
             </div>
           )}

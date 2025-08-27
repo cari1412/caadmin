@@ -15,7 +15,7 @@ export default function Analytics() {
   });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ru-RU', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
     });
@@ -60,27 +60,27 @@ export default function Analytics() {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">
-          Аналитика уведомлений
+          Notification Analytics
         </h1>
         <p className="mt-2 text-sm text-gray-700">
-          Статистика отправки и доставки push-уведомлений
+          Statistics for push notification delivery and performance
         </p>
       </div>
 
-      {/* Период */}
+      {/* Period selector */}
       <div className="mb-6">
         <div className="flex items-center space-x-4">
           <CalendarIcon className="h-5 w-5 text-gray-400" />
-          <span className="text-sm text-gray-700">Период:</span>
+          <span className="text-sm text-gray-700">Period:</span>
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value={1}>1 день</option>
-            <option value={7}>7 дней</option>
-            <option value={30}>30 дней</option>
-            <option value={90}>90 дней</option>
+            <option value={1}>1 day</option>
+            <option value={7}>7 days</option>
+            <option value={30}>30 days</option>
+            <option value={90}>90 days</option>
           </select>
         </div>
       </div>
@@ -96,15 +96,15 @@ export default function Analytics() {
       ) : error ? (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-700">
-            Ошибка загрузки аналитики: {error.message}
+            Error loading analytics: {error.message}
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* График по дням */}
+          {/* Daily chart */}
           <div className="bg-white p-6 shadow rounded-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Уведомления по дням
+              Daily Notifications
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={dailyData}>
@@ -117,10 +117,10 @@ export default function Analytics() {
             </ResponsiveContainer>
           </div>
 
-          {/* Статусы доставки */}
+          {/* Delivery status */}
           <div className="bg-white p-6 shadow rounded-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Статусы доставки
+              Delivery Status
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -136,7 +136,7 @@ export default function Analytics() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {statusData.map((_: any, index: number) => (
+                  {statusData.map((_entry: DataItem, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -145,10 +145,10 @@ export default function Analytics() {
             </ResponsiveContainer>
           </div>
 
-          {/* Типы уведомлений */}
+          {/* Notification types */}
           <div className="bg-white p-6 shadow rounded-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Типы уведомлений
+              Notification Types
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -164,7 +164,7 @@ export default function Analytics() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {typeData.map((_: any, index: number) => (
+                  {typeData.map((_entry: DataItem, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -173,38 +173,38 @@ export default function Analytics() {
             </ResponsiveContainer>
           </div>
 
-          {/* Сводка */}
+          {/* Summary */}
           <div className="bg-white p-6 shadow rounded-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Сводка за период
+              Period Summary
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Период</span>
+                <span className="text-sm text-gray-500">Period</span>
                 <span className="text-sm font-medium">
-                  {days} {days === 1 ? 'день' : days < 5 ? 'дня' : 'дней'}
+                  {days} {days === 1 ? 'day' : 'days'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Всего уведомлений</span>
+                <span className="text-sm text-gray-500">Total notifications</span>
                 <span className="text-sm font-medium">
                   {statusData.reduce((sum: number, item: DataItem) => sum + item.value, 0)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Успешно доставлено</span>
+                <span className="text-sm text-gray-500">Successfully delivered</span>
                 <span className="text-sm font-medium text-green-600">
                   {statusData.find((s: DataItem) => s.name === 'SENT')?.value || 0}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Ошибок</span>
+                <span className="text-sm text-gray-500">Failed</span>
                 <span className="text-sm font-medium text-red-600">
                   {statusData.find((s: DataItem) => s.name === 'FAILED')?.value || 0}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Среднее в день</span>
+                <span className="text-sm text-gray-500">Average per day</span>
                 <span className="text-sm font-medium">
                   {Math.round(statusData.reduce((sum: number, item: DataItem) => sum + item.value, 0) / days)}
                 </span>

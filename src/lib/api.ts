@@ -52,7 +52,7 @@ export interface User {
 export interface NotificationData {
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   badge?: number;
   channelId?: string;
   priority?: 'default' | 'normal' | 'high';
@@ -93,6 +93,7 @@ export async function logout() {
     await api.post('/auth/logout');
   } catch (error) {
     // Игнорируем ошибки logout
+    console.warn('Logout error:', error);
   }
 }
 
