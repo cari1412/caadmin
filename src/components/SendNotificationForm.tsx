@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   sendNotificationToAll, 
   sendNotificationToUser, 
-  sendNotificationToSegment,
-  NotificationData 
+  sendNotificationToSegment
 } from '../lib/api';
 
 interface SendNotificationFormProps {
