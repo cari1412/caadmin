@@ -11,24 +11,7 @@ import {
 import { fetchUsers, User } from '../lib/api';
 import SendNotificationForm from './SendNotificationForm';
 
-interface PushToken {
-  id: number;
-  platform: 'IOS' | 'ANDROID' | 'WEB';
-  deviceId?: string;
-  lastUsed: string;
-}
-
-interface ScheduledNotification {
-  id: string;
-  type: string;
-  scheduledFor: string;
-}
-
-interface UserWithTokens extends User {
-  pushTokens: PushToken[];
-  scheduledNotifications: ScheduledNotification[];
-}
-
+// Убираем локальные интерфейсы и используем типы из api.ts
 interface PaginationInfo {
   page: number;
   limit: number;
@@ -37,14 +20,14 @@ interface PaginationInfo {
 }
 
 interface UsersResponse {
-  users: UserWithTokens[];
+  users: User[]; // Используем User из api.ts
   pagination: PaginationInfo;
 }
 
 export default function UsersManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [selectedUser, setSelectedUser] = useState<UserWithTokens | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showNotificationForm, setShowNotificationForm] = useState(false);
 
   const { data, isLoading, error } = useQuery<UsersResponse>({
@@ -246,9 +229,17 @@ export default function UsersManagement() {
                                 <span className="text-xs font-medium text-gray-900">
                                   {getPlatformIcon(token.platform)} {token.platform}
                                 </span>
-                                <span className="text-xs text-gray-500">
-                                  ID: {token.id}
-                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-xs text-gray-500">
+                                    ID: {token.id}
+                                  </span>
+                                  {/* Показываем статус активности */}
+                                  {token.isActive ? (
+                                    <CheckCircleIcon className="h-3 w-3 text-green-500" title="Активен" />
+                                  ) : (
+                                    <XCircleIcon className="h-3 w-3 text-red-500" title="Неактивен" />
+                                  )}
+                                </div>
                               </div>
                               {token.deviceId && (
                                 <div className="mt-1">
