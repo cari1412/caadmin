@@ -23,10 +23,35 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
     setError(null);
 
     try {
-      await login(data.email, data.password);
+      console.log('Attempting login with:', data.email);
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL || 'https://mobi.prospecttrade.org/api');
+      
+      const response = await login(data.email, data.password);
+      console.log('Login response:', response);
+      
       onLogin();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка авторизации');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      
+      let errorMessage = 'Ошибка авторизации';
+      
+      if (err.response?.status === 404) {
+        errorMessage = 'Эндпоинт не найден. Проверьте настройки сервера.';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Неверный email или пароль';
+      } else if (err.response?.status === 403) {
+        errorMessage = 'Доступ запрещен';
+      } else if (err.code === 'NETWORK_ERROR' || err.message?.includes('Network Error')) {
+        errorMessage = 'Ошибка сети. Проверьте соединение с сервером.';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -114,6 +139,13 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
           <div className="text-center">
             <p className="text-xs text-gray-500">
               Используйте учетные данные администратора для доступа к панели управления уведомлениями
+            </p>
+          </div>
+
+          {/* Debug info - можно удалить в продакшне */}
+          <div className="text-center">
+            <p className="text-xs text-gray-400">
+              API: {process.env.NEXT_PUBLIC_API_URL || 'https://mobi.prospecttrade.org/api'}
             </p>
           </div>
         </form>
