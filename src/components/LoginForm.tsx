@@ -18,7 +18,10 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>();
 
-  const onSubmit = async (data: LoginData) => {
+  const onSubmit = async (data: LoginData, event?: React.BaseSyntheticEvent) => {
+    console.log('🚀 onSubmit function called!', data);
+    event?.preventDefault();
+    
     setIsLoading(true);
     setError(null);
 
@@ -84,7 +87,13 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form 
+          className="mt-8 space-y-6" 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(onSubmit)(e);
+          }}
+        >
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
