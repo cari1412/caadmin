@@ -153,7 +153,7 @@ export default function Settings() {
                     <ul className="list-disc list-inside space-y-1">
                       <li>Maintenance operations may take some time</li>
                       <li>Deleted tokens cannot be restored</li>
-                      <li>Recommend running cleanup during off-hours</li>
+                      <li>Recommended to run cleanup during off-hours</li>
                     </ul>
                   </div>
                 </div>
