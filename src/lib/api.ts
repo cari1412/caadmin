@@ -1,10 +1,11 @@
+// src/lib/api.ts - Обновленная версия для работы с вашим сервером
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mobi.prospecttrade.org/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
 });
 
 // Добавляем токен авторизации к каждому запросу
@@ -32,7 +33,7 @@ api.interceptors.response.use(
 export interface User {
   id: number;
   email: string;
-  name: string;
+  name?: string;
   emailVerified: boolean;
   isActive: boolean;
   createdAt: string;
@@ -41,12 +42,30 @@ export interface User {
     platform: 'IOS' | 'ANDROID' | 'WEB';
     deviceId?: string;
     lastUsed: string;
+    isActive: boolean;
   }>;
   scheduledNotifications: Array<{
     id: string;
     type: string;
     scheduledFor: string;
   }>;
+}
+
+export interface ScheduledNotification {
+  id: string;
+  type: string;
+  scheduledFor: string;
+  executed: boolean;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: number;
+    email: string;
+    name?: string;
+  };
 }
 
 export interface NotificationData {
@@ -79,6 +98,24 @@ export interface DashboardStats {
   };
 }
 
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  emailVerified?: boolean;
+  hasActiveTokens?: boolean;
+  platform?: 'IOS' | 'ANDROID' | 'WEB';
+  type?: string;
+  executed?: boolean;
+}
+
+export interface SegmentCriteria {
+  platform?: 'IOS' | 'ANDROID';
+  registeredAfter?: string;
+  registeredBefore?: string;
+  hasActiveTokens?: boolean;
+}
+
 // === AUTH API ===
 export async function login(email: string, password: string) {
   const response = await api.post('/auth/login', { email, password });
@@ -92,8 +129,16 @@ export async function logout() {
   try {
     await api.post('/auth/logout');
   } catch (error) {
-    // Игнорируем ошибки logout
     console.warn('Logout error:', error);
+  }
+}
+
+export async function checkAuthStatus() {
+  try {
+    const response = await api.get('/auth/check');
+    return response.data;
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -104,17 +149,18 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 }
 
 // === USERS API ===
-export async function fetchUsers(params: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}) {
+export async function fetchUsers(params: PaginationParams = {}) {
   const response = await api.get('/admin/users', { params });
   return response.data;
 }
 
-export async function fetchUserNotifications(userId: number) {
-  const response = await api.get(`/admin/users/${userId}/notifications`);
+export async function fetchUserDetails(userId: number) {
+  const response = await api.get(`/admin/users/${userId}`);
+  return response.data;
+}
+
+export async function fetchUserNotifications(userId: number, params: PaginationParams = {}) {
+  const response = await api.get(`/admin/users/${userId}/notifications`, { params });
   return response.data;
 }
 
@@ -131,24 +177,14 @@ export async function sendNotificationToAll(notification: NotificationData) {
 
 export async function sendNotificationToSegment(data: {
   notification: NotificationData;
-  criteria: {
-    platform?: 'IOS' | 'ANDROID';
-    registeredAfter?: string;
-    registeredBefore?: string;
-    hasActiveTokens?: boolean;
-  };
+  criteria: SegmentCriteria;
 }) {
   const response = await api.post('/admin/notifications/send-to-segment', data);
   return response.data;
 }
 
 // === SCHEDULER API ===
-export async function fetchScheduledNotifications(params: {
-  page?: number;
-  limit?: number;
-  type?: string;
-  executed?: boolean;
-}) {
+export async function fetchScheduledNotifications(params: PaginationParams = {}) {
   const response = await api.get('/admin/scheduler/notifications', { params });
   return response.data;
 }
@@ -179,5 +215,21 @@ export async function cleanupInactiveTokens() {
 
 export async function getSystemHealth() {
   const response = await api.get('/admin/system/health');
+  return response.data;
+}
+
+export async function getPushTokens(params: PaginationParams = {}) {
+  const response = await api.get('/admin/tokens', { params });
+  return response.data;
+}
+
+// === DEBUG API ===
+export async function getDebugUserStatus(userId: number) {
+  const response = await api.get(`/admin/debug/user/${userId}/status`);
+  return response.data;
+}
+
+export async function sendDebugTestNotification(userId: number) {
+  const response = await api.post(`/admin/debug/test-notification/${userId}`);
   return response.data;
 }
