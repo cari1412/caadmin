@@ -30,24 +30,36 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       console.log('Login response:', response);
       
       onLogin();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
+      
+      // Type guard для axios error
+      const isAxiosError = (error: unknown): error is { response?: { data?: { message?: string }, status?: number }, code?: string, message?: string } => {
+        return typeof error === 'object' && error !== null;
+      };
+      
+      if (isAxiosError(err)) {
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
+      }
       
       let errorMessage = 'Ошибка авторизации';
       
-      if (err.response?.status === 404) {
-        errorMessage = 'Эндпоинт не найден. Проверьте настройки сервера.';
-      } else if (err.response?.status === 401) {
-        errorMessage = 'Неверный email или пароль';
-      } else if (err.response?.status === 403) {
-        errorMessage = 'Доступ запрещен';
-      } else if (err.code === 'NETWORK_ERROR' || err.message?.includes('Network Error')) {
-        errorMessage = 'Ошибка сети. Проверьте соединение с сервером.';
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.message) {
+      if (isAxiosError(err)) {
+        if (err.response?.status === 404) {
+          errorMessage = 'Эндпоинт не найден. Проверьте настройки сервера.';
+        } else if (err.response?.status === 401) {
+          errorMessage = 'Неверный email или пароль';
+        } else if (err.response?.status === 403) {
+          errorMessage = 'Доступ запрещен';
+        } else if (err.code === 'NETWORK_ERROR' || err.message?.includes('Network Error')) {
+          errorMessage = 'Ошибка сети. Проверьте соединение с сервером.';
+        } else if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+      } else if (err instanceof Error) {
         errorMessage = err.message;
       }
       
