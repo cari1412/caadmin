@@ -111,7 +111,7 @@ export default function Settings() {
                     Cleanup inactive tokens
                   </h4>
                   <p className="text-sm text-gray-500">
-                    Remove push tokens that haven't been used for more than 30 days
+                    Remove push tokens that have not been used for more than 30 days
                   </p>
                 </div>
               </div>
